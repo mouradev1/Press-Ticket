@@ -31,28 +31,30 @@ const connectToSocket = () => {
         }
 
         const socket = openSocket(getBackendUrl(), {
-            transports: ["websocket"],
+            transports: ["websocket", "polling"],
             query: {
                 token: parsedToken
             },
             reconnection: true,
-            reconnectionDelay: 5000,
-            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            reconnectionAttempts: 10,
             forceNew: false,
-            timeout: 10000
+            timeout: 20000,
+            upgrade: true
         });
 
         socket.on("connect", () => {
-            console.log("Socket conectado com sucesso");
+            console.log("🟢 Socket conectado com sucesso - ID:", socket.id);
         });
 
         socket.on("connect_error", (error) => {
-            console.error("Erro na conexão do socket:", error.message);
+            console.error("🔴 Erro na conexão do socket:", error.message);
             
             if (error.message.includes("jwt expired") || 
                 error.message.includes("invalid token") || 
                 error.message.includes("jwt malformed")) {
-                console.warn("Problema com o token, desconectando socket");
+                console.warn("⚠️ Problema com o token, desconectando socket");
                 socket.disconnect();
                 localStorage.removeItem("token"); // Remove o token inválido
                 window.location.reload(); // Força um reload para limpar o estado
@@ -60,12 +62,25 @@ const connectToSocket = () => {
         });
 
         socket.on("disconnect", (reason) => {
-            console.log("Socket desconectado:", reason);
+            console.log("🔴 Socket desconectado:", reason);
             if (reason === "io server disconnect" || 
                 reason === "forced close" || 
                 reason === "ping timeout") {
                 socket.disconnect();
             }
+        });
+
+        socket.on("reconnect", (attemptNumber) => {
+            console.log("🟡 Socket reconectado após", attemptNumber, "tentativas");
+        });
+
+        socket.on("reconnect_attempt", (attemptNumber) => {
+            console.log("🟡 Tentando reconectar socket... tentativa", attemptNumber);
+        });
+
+        // Log de todos os eventos para debug
+        socket.onAny((eventName, ...args) => {
+            console.log(`📡 Evento socket recebido: ${eventName}`, args);
         });
 
         return socket;

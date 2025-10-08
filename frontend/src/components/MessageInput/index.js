@@ -48,7 +48,6 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { debugSocket } from "../../utils/debugSocket";
 import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import toastError from "../../errors/toastError";
@@ -560,7 +559,7 @@ const MessageInput = ({ ticketStatus }) => {
     };
     
     try {
-      debugSocket.logMessageFlow("ENVIANDO_MENSAGEM", ticketId, { body: messageText, editingMessage: editingMessage?.id });
+      console.log("🚀 Enviando mensagem:", { ticketId, body: messageText, editingMessage: editingMessage?.id });
       
       let response;
       if (editingMessage !== null) {
@@ -576,8 +575,7 @@ const MessageInput = ({ ticketStatus }) => {
         }
       }
       
-      debugSocket.logMessageFlow("MENSAGEM_ENVIADA_API", ticketId, response?.data);
-      console.log("Mensagem enviada com sucesso:", response?.data);
+      console.log("✅ Mensagem enviada com sucesso:", response?.data);
     } catch (err) {
       console.error("Erro ao enviar mensagem:", err);
       toastError(err, t);

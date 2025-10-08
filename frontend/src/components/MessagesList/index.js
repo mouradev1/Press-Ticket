@@ -30,7 +30,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { useMessages } from "../../hooks/useMessages";
+import openSocket from "../../services/socket-io";
 import Audio from "../Audio";
 import LocationPreview from "../LocationPreview";
 import WhatsMarked from "react-whatsmarked";
@@ -418,13 +418,75 @@ const MessagesList = ({ ticketId, isGroup }) => {
     };
   }, [pageNumber, ticketId]);
 
-  // Usar o hook personalizado para gerenciar mensagens
-  const { socket, connected } = useMessages(ticketId, dispatch);
-
-  // Scroll para baixo sempre que uma nova mensagem for adicionada
   useEffect(() => {
-    scrollToBottom();
-  }, [messagesList]);
+    const socket = openSocket();
+
+    if (!socket) {
+      console.error("Socket não pôde ser inicializado");
+      return;
+    }
+
+    const handleConnect = () => {
+      console.log("Socket conectado, entrando no chat:", ticketId);
+      socket.emit("joinChatBox", ticketId);
+    };
+
+    const handleMessage = (data) => {
+      console.log("Mensagem recebida via socket:", data);
+      
+      if (data.action === "create" && data.message) {
+        // Verificar se a mensagem é para este ticket
+        const messageTicketId = data.message.ticketId?.toString() || data.message.ticket?.id?.toString();
+        console.log("Verificando ticket - atual:", ticketId, "mensagem:", messageTicketId);
+        
+        if (messageTicketId === ticketId) {
+          console.log("Adicionando mensagem ao chat:", data.message);
+          dispatch({ type: "ADD_MESSAGE", payload: data.message });
+          
+          // Scroll para baixo após pequeno delay
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+        }
+      }
+
+      if (data.action === "update" && data.message) {
+        const messageTicketId = data.message.ticketId?.toString() || data.message.ticket?.id?.toString();
+        if (messageTicketId === ticketId) {
+          console.log("Atualizando mensagem no chat:", data.message);
+          dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
+        }
+      }
+    };
+
+    const handleJoinedChatBox = (data) => {
+      console.log("Confirmação de entrada no chat:", data);
+    };
+
+    const handleDisconnect = () => {
+      console.log("Socket desconectado");
+    };
+
+    // Adicionar listeners
+    socket.on("connect", handleConnect);
+    socket.on("appMessage", handleMessage);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("joinedChatBox", handleJoinedChatBox);
+
+    // Se já está conectado, entrar no chat imediatamente
+    if (socket.connected) {
+      handleConnect();
+    }
+
+    return () => {
+      console.log("Limpando listeners do socket para ticketId:", ticketId);
+      socket.off("connect", handleConnect);
+      socket.off("appMessage", handleMessage);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("joinedChatBox", handleJoinedChatBox);
+      // NÃO desconectar o socket aqui, apenas remover os listeners
+    };
+  }, [ticketId]);
 
   const loadMore = () => {
     setPageNumber((prevPageNumber) => prevPageNumber + 1);
