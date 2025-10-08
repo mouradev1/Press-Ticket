@@ -30,7 +30,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import openSocket from "../../services/socket-io";
+import { useMessages } from "../../hooks/useMessages";
 import Audio from "../Audio";
 import LocationPreview from "../LocationPreview";
 import WhatsMarked from "react-whatsmarked";
@@ -320,15 +320,22 @@ const reducer = (state, action) => {
 
   if (action.type === "ADD_MESSAGE") {
     const newMessage = action.payload;
+    console.log("Reducer ADD_MESSAGE - Nova mensagem:", newMessage);
+    console.log("Estado atual das mensagens:", state.length, "mensagens");
+    
     const messageIndex = state.findIndex((m) => m.id === newMessage.id);
 
     if (messageIndex !== -1) {
+      console.log("Mensagem já existe, atualizando...");
       state[messageIndex] = newMessage;
     } else {
+      console.log("Nova mensagem sendo adicionada...");
       state.push(newMessage);
     }
 
-    return [...state];
+    const newState = [...state];
+    console.log("Novo estado das mensagens:", newState.length, "mensagens");
+    return newState;
   }
 
   function ToastDisplay(props) {
@@ -411,58 +418,13 @@ const MessagesList = ({ ticketId, isGroup }) => {
     };
   }, [pageNumber, ticketId]);
 
+  // Usar o hook personalizado para gerenciar mensagens
+  const { socket, connected } = useMessages(ticketId, dispatch);
+
+  // Scroll para baixo sempre que uma nova mensagem for adicionada
   useEffect(() => {
-    const socket = openSocket();
-
-    if (!socket) {
-      console.error("Socket não pôde ser inicializado");
-      return;
-    }
-
-    const handleConnect = () => {
-      console.log("Socket conectado, entrando no chat:", ticketId);
-      socket.emit("joinChatBox", ticketId);
-    };
-
-    const handleJoinedChatBox = (data) => {
-      console.log("Confirmação de entrada no chat recebida:", data);
-    };
-
-    const handleMessage = (data) => {
-      console.log("Mensagem recebida via socket:", data);
-      if (data.action === "create") {
-        dispatch({ type: "ADD_MESSAGE", payload: data.message });
-        scrollToBottom();
-      }
-
-      if (data.action === "update") {
-        dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
-      }
-    };
-
-    const handleDisconnect = () => {
-      console.log("Socket desconectado");
-    };
-
-    socket.on("connect", handleConnect);
-    socket.on("appMessage", handleMessage);
-    socket.on("disconnect", handleDisconnect);
-    socket.on("joinedChatBox", handleJoinedChatBox);
-
-    // Se já estiver conectado, entre no chat imediatamente
-    if (socket.connected) {
-      handleConnect();
-    }
-
-    return () => {
-      console.log("Limpando listeners do socket para ticketId:", ticketId);
-      socket.off("connect", handleConnect);
-      socket.off("appMessage", handleMessage);
-      socket.off("disconnect", handleDisconnect);
-      socket.off("joinedChatBox", handleJoinedChatBox);
-      // NÃO desconectar o socket aqui, apenas remover os listeners
-    };
-  }, [ticketId]);
+    scrollToBottom();
+  }, [messagesList]);
 
   const loadMore = () => {
     setPageNumber((prevPageNumber) => prevPageNumber + 1);

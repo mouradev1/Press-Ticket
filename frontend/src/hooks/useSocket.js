@@ -1,55 +1,101 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import openSocket from '../services/socket-io';
 
 let globalSocket = null;
+let isConnecting = false;
 
 export const useSocket = () => {
     const [connected, setConnected] = useState(false);
     const socketRef = useRef(null);
+    const reconnectTimeoutRef = useRef(null);
 
-    useEffect(() => {
-        if (!globalSocket) {
-            try {
-                globalSocket = openSocket();
-                if (globalSocket) {
-                    globalSocket.on('connect', () => {
-                        console.log('Socket conectado');
-                        setConnected(true);
-                    });
-
-                    globalSocket.on('disconnect', () => {
-                        console.log('Socket desconectado');
-                        setConnected(false);
-                    });
-
-                    globalSocket.on('error', (error) => {
-                        console.error('Erro no socket:', error);
-                        if (error.message?.includes('insufficient resources')) {
-                            globalSocket.disconnect();
-                            setTimeout(() => {
-                                globalSocket = null;
-                                socketRef.current = null;
-                            }, 5000);
-                        }
-                    });
-
-                    globalSocket.on('reconnect_attempt', () => {
-                        console.log('Tentativa de reconexão do socket');
-                    });
-                }
-            } catch (err) {
-                console.error("Erro ao inicializar socket:", err);
-                globalSocket = null;
-            }
+    const initializeSocket = useCallback(() => {
+        if (isConnecting || (globalSocket && globalSocket.connected)) {
+            return;
         }
 
+        isConnecting = true;
+        
+        try {
+            console.log('Inicializando novo socket...');
+            globalSocket = openSocket();
+            
+            if (globalSocket) {
+                globalSocket.on('connect', () => {
+                    console.log('Socket conectado com sucesso');
+                    setConnected(true);
+                    isConnecting = false;
+                    
+                    // Limpar timeout de reconexão se existir
+                    if (reconnectTimeoutRef.current) {
+                        clearTimeout(reconnectTimeoutRef.current);
+                        reconnectTimeoutRef.current = null;
+                    }
+                });
+
+                globalSocket.on('disconnect', (reason) => {
+                    console.log('Socket desconectado:', reason);
+                    setConnected(false);
+                    isConnecting = false;
+                    
+                    // Se a desconexão não foi intencional, tenta reconectar
+                    if (reason !== 'io client disconnect') {
+                        reconnectTimeoutRef.current = setTimeout(() => {
+                            console.log('Tentando reconectar...');
+                            globalSocket = null;
+                            initializeSocket();
+                        }, 3000);
+                    }
+                });
+
+                globalSocket.on('connect_error', (error) => {
+                    console.error('Erro de conexão no socket:', error);
+                    setConnected(false);
+                    isConnecting = false;
+                    
+                    // Tentar reconectar após erro
+                    reconnectTimeoutRef.current = setTimeout(() => {
+                        globalSocket = null;
+                        initializeSocket();
+                    }, 5000);
+                });
+
+                globalSocket.on('error', (error) => {
+                    console.error('Erro no socket:', error);
+                    if (error.message?.includes('insufficient resources')) {
+                        globalSocket.disconnect();
+                        setTimeout(() => {
+                            globalSocket = null;
+                            socketRef.current = null;
+                        }, 5000);
+                    }
+                });
+
+                // Adicionar listener para debug de eventos
+                globalSocket.onAny((eventName, ...args) => {
+                    console.log(`Evento socket recebido: ${eventName}`, args);
+                });
+            }
+        } catch (err) {
+            console.error("Erro ao inicializar socket:", err);
+            globalSocket = null;
+            isConnecting = false;
+        }
+    }, []);
+
+    useEffect(() => {
+        initializeSocket();
         socketRef.current = globalSocket;
 
         return () => {
-            // Não desconecta o socket global no cleanup
+            // Limpar timeout ao desmontar
+            if (reconnectTimeoutRef.current) {
+                clearTimeout(reconnectTimeoutRef.current);
+                reconnectTimeoutRef.current = null;
+            }
             socketRef.current = null;
         };
-    }, []);
+    }, [initializeSocket]);
 
     const getSocket = () => {
         return socketRef.current;

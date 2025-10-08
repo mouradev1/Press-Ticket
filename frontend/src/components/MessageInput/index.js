@@ -48,6 +48,7 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { debugSocket } from "../../utils/debugSocket";
 import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import toastError from "../../errors/toastError";
@@ -543,34 +544,50 @@ const MessageInput = ({ ticketStatus }) => {
 
   const handleSendMessage = async () => {
     if (inputMessage.trim() === "") return;
+    
+    const messageText = inputMessage.trim();
+    console.log("Enviando mensagem:", messageText);
+    
     setLoading(true);
     const message = {
       read: 1,
       fromMe: true,
       mediaUrl: "",
       body: signMessage
-        ? `*${user?.name}:*\n${inputMessage.trim()}`
-        : inputMessage.trim(),
+        ? `*${user?.name}:*\n${messageText}`
+        : messageText,
       quotedMsg: replyingMessage,
     };
+    
     try {
+      debugSocket.logMessageFlow("ENVIANDO_MENSAGEM", ticketId, { body: messageText, editingMessage: editingMessage?.id });
+      
+      let response;
       if (editingMessage !== null) {
-        await api.post(`/messages/edit/${editingMessage.id}`, message);
+        console.log("Editando mensagem:", editingMessage.id);
+        response = await api.post(`/messages/edit/${editingMessage.id}`, message);
       } else {
         if (channelType !== null) {
-          await api.post(`/hub-message/${ticketId}`, message);
+          console.log("Enviando via hub-message para ticket:", ticketId);
+          response = await api.post(`/hub-message/${ticketId}`, message);
         } else {
-          await api.post(`/messages/${ticketId}`, message);
+          console.log("Enviando mensagem para ticket:", ticketId);
+          response = await api.post(`/messages/${ticketId}`, message);
         }
       }
+      
+      debugSocket.logMessageFlow("MENSAGEM_ENVIADA_API", ticketId, response?.data);
+      console.log("Mensagem enviada com sucesso:", response?.data);
     } catch (err) {
+      console.error("Erro ao enviar mensagem:", err);
       toastError(err, t);
+    } finally {
+      setInputMessage("");
+      setShowEmoji(false);
+      setLoading(false);
+      setReplyingMessage(null);
+      setEditingMessage(null);
     }
-    setInputMessage("");
-    setShowEmoji(false);
-    setLoading(false);
-    setReplyingMessage(null);
-    setEditingMessage(null);
   };
 
   const handleStartRecording = async () => {
