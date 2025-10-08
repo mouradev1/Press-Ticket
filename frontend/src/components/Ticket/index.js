@@ -103,9 +103,18 @@ const Ticket = () => {
   useEffect(() => {
     const socket = openSocket();
 
-    socket.on("connect", () => socket.emit("joinChatBox", ticketId));
+    if (!socket) {
+      console.error("Socket não pôde ser inicializado no componente Ticket");
+      return;
+    }
 
-    socket.on("ticket", (data) => {
+    const handleConnect = () => {
+      console.log("Socket conectado no Ticket, entrando no chat:", ticketId);
+      socket.emit("joinChatBox", ticketId);
+    };
+
+    const handleTicket = (data) => {
+      console.log("Evento ticket recebido:", data);
       if (data.action === "update") {
         setTicket(data.ticket);
       }
@@ -114,9 +123,9 @@ const Ticket = () => {
         toast.success("Ticket deleted sucessfully.");
         history.push("/tickets");
       }
-    });
+    };
 
-    socket.on("contact", (data) => {
+    const handleContact = (data) => {
       if (data.action === "update") {
         setContact((prevState) => {
           if (prevState.id === data.contact?.id) {
@@ -125,10 +134,23 @@ const Ticket = () => {
           return prevState;
         });
       }
-    });
+    };
+
+    socket.on("connect", handleConnect);
+    socket.on("ticket", handleTicket);
+    socket.on("contact", handleContact);
+
+    // Se já estiver conectado, entre no chat imediatamente
+    if (socket.connected) {
+      handleConnect();
+    }
 
     return () => {
-      socket.disconnect();
+      console.log("Limpando listeners do socket no componente Ticket");
+      socket.off("connect", handleConnect);
+      socket.off("ticket", handleTicket);
+      socket.off("contact", handleContact);
+      // NÃO desconectar o socket aqui
     };
   }, [ticketId, history]);
 

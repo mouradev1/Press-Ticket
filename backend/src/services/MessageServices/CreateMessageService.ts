@@ -71,6 +71,10 @@ const CreateMessageService = async ({
   }
 
   const io = getIO();
+  
+  console.log(`Emitindo mensagem para ticketId: ${message.ticketId}, status: ${message.ticket.status}`);
+  console.log(`Rooms disponíveis no socket.io:`, Array.from(io.sockets.adapter.rooms.keys()));
+  
   io.to(message.ticketId.toString())
     .to(message.ticket.status)
     .to("notification")
@@ -80,6 +84,8 @@ const CreateMessageService = async ({
       ticket: message.ticket,
       contact: message.ticket.contact
     });
+    
+  console.log(`Mensagem emitida com sucesso para ticketId: ${message.ticketId}`);
 
   return message;
 };

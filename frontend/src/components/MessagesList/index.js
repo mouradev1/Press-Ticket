@@ -414,9 +414,22 @@ const MessagesList = ({ ticketId, isGroup }) => {
   useEffect(() => {
     const socket = openSocket();
 
-    socket.on("connect", () => socket.emit("joinChatBox", ticketId));
+    if (!socket) {
+      console.error("Socket não pôde ser inicializado");
+      return;
+    }
 
-    socket.on("appMessage", (data) => {
+    const handleConnect = () => {
+      console.log("Socket conectado, entrando no chat:", ticketId);
+      socket.emit("joinChatBox", ticketId);
+    };
+
+    const handleJoinedChatBox = (data) => {
+      console.log("Confirmação de entrada no chat recebida:", data);
+    };
+
+    const handleMessage = (data) => {
+      console.log("Mensagem recebida via socket:", data);
       if (data.action === "create") {
         dispatch({ type: "ADD_MESSAGE", payload: data.message });
         scrollToBottom();
@@ -425,10 +438,29 @@ const MessagesList = ({ ticketId, isGroup }) => {
       if (data.action === "update") {
         dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
       }
-    });
+    };
+
+    const handleDisconnect = () => {
+      console.log("Socket desconectado");
+    };
+
+    socket.on("connect", handleConnect);
+    socket.on("appMessage", handleMessage);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("joinedChatBox", handleJoinedChatBox);
+
+    // Se já estiver conectado, entre no chat imediatamente
+    if (socket.connected) {
+      handleConnect();
+    }
 
     return () => {
-      socket.disconnect();
+      console.log("Limpando listeners do socket para ticketId:", ticketId);
+      socket.off("connect", handleConnect);
+      socket.off("appMessage", handleMessage);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("joinedChatBox", handleJoinedChatBox);
+      // NÃO desconectar o socket aqui, apenas remover os listeners
     };
   }, [ticketId]);
 

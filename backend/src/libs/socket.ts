@@ -192,7 +192,25 @@ export const initIO = (httpServer: Server): void => {
         ticketId,
         socketId: socket.id
       });
+      
+      // Verificar se já está na room
+      const rooms = Array.from(socket.rooms);
+      console.log(`Socket ${socket.id} rooms antes de entrar: ${rooms.join(', ')}`);
+      
       socket.join(ticketId);
+      
+      // Verificar se entrou na room com sucesso
+      const roomsAfter = Array.from(socket.rooms);
+      console.log(`Socket ${socket.id} rooms após entrar: ${roomsAfter.join(', ')}`);
+      
+      // Confirmar que entrou na room
+      socket.emit("joinedChatBox", { ticketId, success: true });
+      
+      logger.info("Usuário entrou no chat com sucesso", {
+        ticketId,
+        socketId: socket.id,
+        rooms: roomsAfter
+      });
     });
 
     socket.on("joinNotification", () => {
