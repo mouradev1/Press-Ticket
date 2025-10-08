@@ -152,7 +152,11 @@ const ListTicketsService = async ({
   if (!isAdmin && !allTicketsEnabled) {
     whereCondition = {
       ...whereCondition,
-      [Op.or]: [{ userId }, { status: "pending" }]
+      [Op.or]: [
+        { userId }, 
+        { status: "pending" },
+        { [Op.and]: [{ userId }, { status: "closed" }] }
+      ]
     };
   }
 
