@@ -505,7 +505,7 @@ const TicketsManager = () => {
       <TabPanel value={tab} name="closed" className={classes.ticketsWrapper}>
         <TicketsList
           status="closed"
-          showAll={true}
+          showAll={user.profile === "admin"}
           selectedQueueIds={selectedQueueIds}
         />
       </TabPanel>

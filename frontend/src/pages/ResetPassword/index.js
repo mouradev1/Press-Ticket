@@ -22,8 +22,8 @@ const Copyright = ({ companyName, companyUrl }) => {
         <Typography variant="body2" color="textSecondary" align="center">
             {new Date().getFullYear()}
             {" - "}
-            <Link color="inherit" href={companyUrl || "https://github.com/rtenorioh/Press-Ticket"}>
-                {companyName || "Press Ticket"}
+            <Link color="inherit" href={companyUrl || "https://github.com/rtenorioh/WP-tickets"}>
+                {companyName || "WP-tickets"}
             </Link>
             {"."}
         </Typography>
@@ -56,8 +56,8 @@ const ResetPassword = () => {
     const [theme, setTheme] = useState("light");
     const [companyData, setCompanyData] = useState({
         logo: 'logo.jpg',
-        name: "Press Ticket",
-        url: "https://github.com/rtenorioh/Press-Ticket"
+        name: "WP-tickets",
+        url: "https://github.com/rtenorioh/WP-tickets"
     });
 
     useEffect(() => {
@@ -72,8 +72,8 @@ const ResetPassword = () => {
                     if (lightConfig) {
                         setCompanyData(prevData => ({
                             ...prevData,
-                            name: lightConfig.company || "Press Ticket",
-                            url: lightConfig.url || "https://github.com/rtenorioh/Press-Ticket"
+                            name: lightConfig.company || "WP-tickets",
+                            url: lightConfig.url || "https://github.com/rtenorioh/WP-tickets"
                         }));
                     }
                 }

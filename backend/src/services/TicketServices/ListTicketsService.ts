@@ -153,9 +153,11 @@ const ListTicketsService = async ({
     whereCondition = {
       ...whereCondition,
       [Op.or]: [
-        { userId }, 
-        { status: "pending" },
-        { [Op.and]: [{ userId }, { status: "closed" }] }
+        // Seus próprios tickets (qualquer status: open, pending, closed)
+        { userId },
+        // Tickets aguardando (todos podem pegar)  
+        { status: "pending" }
+        // NÃO incluir tickets "open" ou "closed" de outros (só admin vê todos)
       ]
     };
   }

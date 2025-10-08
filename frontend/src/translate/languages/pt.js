@@ -342,7 +342,6 @@ const messages = {
         buttons: {
           forgotPassword: "Esqueceu a Senha?",
           submit: "Fazer login",
-          register: "Não tem um conta? Cadastre-se!",
         },
       },
       mainDrawer: {
@@ -756,22 +755,6 @@ const messages = {
             }
           },
         }
-      },
-      signup: {
-        title: "Cadastre-se",
-        toasts: {
-          success: "Atendente criado com sucesso! Faça seu login!!!.",
-          fail: "Erro ao criar atendente. Verifique os dados informados.",
-        },
-        form: {
-          name: "Nome",
-          email: "E-mail",
-          password: "Senha",
-        },
-        buttons: {
-          submit: "Cadastrar",
-          login: "Já tem uma conta? Entre!",
-        },
       },
       tags: {
         title: "Tags",

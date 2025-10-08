@@ -115,10 +115,13 @@ export const update = async (
 ): Promise<Response> => {
   const { ticketId } = req.params;
   const ticketData: TicketData = req.body;
+  const requestUser = req.user; // Usuário autenticado
 
   const { ticket } = await UpdateTicketService({
     ticketData,
-    ticketId
+    ticketId,
+    userId: requestUser.id,
+    isAdmin: requestUser.profile === "admin"
   });
 
   if (ticketData.transf) {

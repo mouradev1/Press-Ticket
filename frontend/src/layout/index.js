@@ -141,8 +141,8 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
   const themeStorage = localStorage.getItem("theme");
   const [companyData, setCompanyData] = useState({
     logo: defaultLogo,
-    name: "Press Ticket",
-    url: "https://github.com/rtenorioh/Press-Ticket"
+    name: "WP-tickets",
+    url: "https://github.com/rtenorioh/WP-tickets"
   });
 
   useEffect(() => {
@@ -157,8 +157,8 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
           if (lightConfig) {
             setCompanyData(prevData => ({
               ...prevData,
-              name: lightConfig.company || "Press Ticket",
-              url: lightConfig.url || "https://github.com/rtenorioh/Press-Ticket"
+              name: lightConfig.company || "WP-tickets",
+              url: lightConfig.url || "https://github.com/rtenorioh/WP-tickets"
             }));
           }
         }
@@ -235,7 +235,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
 
   const fetchLatestRelease = async () => {
     try {
-      const response = await fetch("https://api.github.com/repos/rtenorioh/Press-Ticket/releases/latest");
+      const response = await fetch("https://api.github.com/repos/rtenorioh/WP-tickets/releases/latest");
       const data = await response.json();
       return data.tag_name;
     } catch (error) {
@@ -361,7 +361,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
             noWrap
             className={classes.title}
           >
-            {t("mainDrawer.appBar.message.hi")} {user.name}, {t("mainDrawer.appBar.message.text")} {companyData.name || "Press Ticket"}.
+            {t("mainDrawer.appBar.message.hi")} {user.name}, {t("mainDrawer.appBar.message.text")} {companyData.name || "WP-tickets"}.
           </Typography>
 
           <ThemeSelector toggleTheme={toggleTheme} />
@@ -405,7 +405,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
               <span className={classes.systemCss}>
                 <Link
                   color="inherit"
-                  href={companyData.url || "https://github.com/rtenorioh/Press-Ticket"}
+                  href={companyData.url || "https://github.com/rtenorioh/WP-tickets"}
                   style={{ display: "flex", alignItems: "center", marginTop: 10 }}
                 >
                   {latestVersion && latestVersion > systemVersion ? (

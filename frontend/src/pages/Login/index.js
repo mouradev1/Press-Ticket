@@ -26,8 +26,8 @@ const Copyright = ({ companyName, companyUrl }) => {
     <Typography variant="body2" color="textSecondary" align="center">
       {new Date().getFullYear()}
       {" - "}
-      <Link color="inherit" href={companyUrl || "https://github.com/rtenorioh/Press-Ticket"}>
-        {companyName || "Press Ticket"}
+      <Link color="inherit" href={companyUrl || "https://github.com/rtenorioh/WP-tickets"}>
+        {companyName || "WP-tickets"}
       </Link>
       {"."}
     </Typography>
@@ -59,8 +59,8 @@ const Login = () => {
   const [theme, setTheme] = useState("light");
   const [companyData, setCompanyData] = useState({
     logo: null,
-    name: "Press Ticket",
-    url: "https://github.com/rtenorioh/Press-Ticket"
+    name: "WP-tickets",
+    url: "https://github.com/rtenorioh/WP-tickets"
   });
 
   useEffect(() => {
@@ -75,8 +75,8 @@ const Login = () => {
           if (lightConfig) {
             setCompanyData(prevData => ({
               ...prevData,
-              name: lightConfig.company || "Press Ticket",
-              url: lightConfig.url || "https://github.com/rtenorioh/Press-Ticket"
+              name: lightConfig.company || "WP-tickets",
+              url: lightConfig.url || "https://github.com/rtenorioh/WP-tickets"
             }));
           }
         }
@@ -208,16 +208,6 @@ const Login = () => {
                 to="/forgot-password"
               >
                 {t("login.buttons.forgotPassword")}
-              </Link>
-            </Grid>
-            <Grid item>
-              <Link
-                href="#"
-                variant="body2"
-                component={RouterLink}
-                to="/signup"
-              >
-                {t("login.buttons.register")}
               </Link>
             </Grid>
           </Grid>

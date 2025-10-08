@@ -14,6 +14,8 @@ interface TicketData {
 interface Request {
   ticketData: TicketData;
   ticketId: string | number;
+  userId?: number; // ID do usuário que está fazendo a ação
+  isAdmin?: boolean; // Se o usuário é admin
 }
 
 interface Response {
@@ -24,11 +26,18 @@ interface Response {
 
 const UpdateTicketService = async ({
   ticketData,
-  ticketId
+  ticketId,
+  userId: requestUserId,
+  isAdmin = false
 }: Request): Promise<Response> => {
   const { status, userId, queueId, whatsappId } = ticketData;
 
   const ticket = await ShowTicketService(ticketId);
+  
+  // VERIFICAÇÃO DE SEGURANÇA: Apenas admin ou dono do ticket pode modificar
+  if (!isAdmin && ticket.userId !== requestUserId && ticket.status !== "pending") {
+    throw new Error("Você não tem permissão para modificar este ticket");
+  }
   if (ticket.status === "open") {
     await SetTicketMessagesAsRead(ticket);
   }

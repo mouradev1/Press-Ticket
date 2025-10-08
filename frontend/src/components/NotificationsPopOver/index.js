@@ -168,9 +168,9 @@ const NotificationsPopOver = () => {
 		const updateDocumentTitle = async () => {
 			try {
 				const { data } = await api.get("/personalizations");
-				let baseTitle = "Press Ticket";
+				let baseTitle = "WP-tickets";
 				let faviconUrl =
-					"https://github.com/rtenorioh/Press-Ticket/blob/main/frontend/public/favicon.ico?raw=true";
+					"https://github.com/rtenorioh/WP-tickets/blob/main/frontend/public/favicon.ico?raw=true";
 				if (data && data.length > 0) {
 					const lightConfig = data.find((config) => config.theme === "light");
 					const darkConfig = data.find((config) => config.theme === "dark");

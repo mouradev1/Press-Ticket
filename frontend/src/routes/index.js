@@ -16,7 +16,7 @@ import Queues from "../pages/Queues/";
 import QuickAnswers from "../pages/QuickAnswers/";
 import ResetPassword from "../pages/ResetPassword";
 import Settings from "../pages/Settings/";
-import Signup from "../pages/Signup/";
+
 import Tags from "../pages/Tags";
 import Tickets from "../pages/Tickets/";
 import Users from "../pages/Users";
@@ -28,7 +28,6 @@ const Routes = ({ toggleTheme, onThemeConfigUpdate }) => {
       <AuthProvider>
         <Switch>
           <Route exact path="/login" component={Login} />
-          <Route exact path="/signup" component={Signup} />
           <Route exact path="/forgot-password" component={ForgotPassword} />
           <Route exact path="/reset-password" component={ResetPassword} />
           <WhatsAppsProvider>

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Obter a versão automaticamente
-VERSION=$(git ls-remote --tags https://github.com/rtenorioh/Press-Ticket.git | awk -F/ '{print $NF}' | sort -V | tail -n1 || echo "unknown")
+VERSION=$(git ls-remote --tags https://github.com/rtenorioh/WP-tickets.git | awk -F/ '{print $NF}' | sort -V | tail -n1 || echo "unknown")
 
 # Registro do início da execução
 START_TIME=$(date +%s)

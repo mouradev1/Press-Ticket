@@ -8,7 +8,7 @@ module.exports = {
   dialect: process.env.DB_DIALECT || "mysql",
   timezone: process.env.DB_TIMEZONE || "-03:00",
   host: process.env.DB_HOST || "localhost",
-  database: process.env.DB_NAME || "press-ticket",
+  database: process.env.DB_NAME || "wp-tickets",
   username: process.env.DB_USER || "root",
   password: process.env.DB_PASS,
   port: process.env.DB_PORT || 3306,
