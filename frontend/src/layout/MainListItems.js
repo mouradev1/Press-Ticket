@@ -125,35 +125,63 @@ const MainListItems = (props) => {
         {t("mainDrawer.listItems.general")}
       </ListSubheader>
       <Divider className={classes.divider} />
-      <ListItemLink
-        to="/"
-        primary="Dashboard"
-        icon={<DashboardOutlined />}
-        active={location.pathname === '/'}
+      
+      {/* Dashboard - apenas para Admin */}
+      <Can
+        role={user.profile}
+        perform="drawer-admin-items:view"
+        yes={() => (
+          <ListItemLink
+            to="/"
+            primary="Dashboard"
+            icon={<DashboardOutlined />}
+            active={location.pathname === '/'}
+          />
+        )}
       />
+      
+      {/* Tickets - para todos */}
       <ListItemLink
         to="/tickets"
         primary={t("mainDrawer.listItems.tickets")}
         icon={<WhatsApp />}
         active={location.pathname === '/tickets'}
       />
+      
+      {/* Contatos - para todos */}
       <ListItemLink
         to="/contacts"
         primary={t("mainDrawer.listItems.contacts")}
         icon={<ContactPhoneOutlined />}
         active={location.pathname === '/contacts'}
       />
-      <ListItemLink
-        to="/quickAnswers"
-        primary={t("mainDrawer.listItems.quickAnswers")}
-        icon={<QuestionAnswerOutlined />}
-        active={location.pathname === '/quickAnswers'}
+      
+      {/* Respostas Rápidas - apenas para Admin */}
+      <Can
+        role={user.profile}
+        perform="drawer-admin-items:view"
+        yes={() => (
+          <ListItemLink
+            to="/quickAnswers"
+            primary={t("mainDrawer.listItems.quickAnswers")}
+            icon={<QuestionAnswerOutlined />}
+            active={location.pathname === '/quickAnswers'}
+          />
+        )}
       />
-      <ListItemLink
-        to="/tags"
-        primary={t("mainDrawer.listItems.tags")}
-        icon={<LocalOffer />}
-        active={location.pathname === '/tags'}
+      
+      {/* Tags - apenas para Admin */}
+      <Can
+        role={user.profile}
+        perform="drawer-admin-items:view"
+        yes={() => (
+          <ListItemLink
+            to="/tags"
+            primary={t("mainDrawer.listItems.tags")}
+            icon={<LocalOffer />}
+            active={location.pathname === '/tags'}
+          />
+        )}
       />
       <Can
         role={user.profile}

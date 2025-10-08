@@ -32,6 +32,7 @@ import useTickets from "../../hooks/useTickets";
 import api from "../../services/api";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../ConfirmationModal";
+import connectToSocket from "../../services/socket-io";
 
 const useStyles = makeStyles((theme) => ({
   ticketsWrapper: {
@@ -171,6 +172,63 @@ const TicketsManager = () => {
       });
     }
   }, [ticketsInAttendance.count, ticketsWaiting.count, ticketsClosed.count, previousCounts]);
+
+  // Socket.IO listener para atualizar contagens em tempo real
+  useEffect(() => {
+    const socket = connectToSocket();
+    
+    if (!socket) return;
+
+    const handleTicketUpdate = async (data) => {
+      console.log("🔄 Atualizando contagens via Socket.IO:", data);
+      
+      // Força uma nova consulta das contagens
+      try {
+        const [openResponse, pendingResponse, closedResponse] = await Promise.all([
+          api.get("/tickets", {
+            params: {
+              status: "open",
+              showAll: showAllTickets,
+              withUnreadMessages: "false",
+              queueIds: JSON.stringify(userQueueIds),
+            }
+          }),
+          api.get("/tickets", {
+            params: {
+              status: "pending",
+              showAll: "true",
+              withUnreadMessages: "false", 
+              queueIds: JSON.stringify(userQueueIds),
+            }
+          }),
+          api.get("/tickets", {
+            params: {
+              status: "closed",
+              showAll: "true",
+              withUnreadMessages: "false",
+              queueIds: JSON.stringify(userQueueIds),
+            }
+          })
+        ]);
+
+        setPreviousCounts({
+          inAttendance: openResponse.data.count || 0,
+          waiting: pendingResponse.data.count || 0,
+          closed: closedResponse.data.count || 0,
+        });
+      } catch (err) {
+        console.error("Erro ao atualizar contagens:", err);
+      }
+    };
+
+    socket.on("ticket", handleTicketUpdate);
+    socket.on("appMessage", handleTicketUpdate);
+
+    return () => {
+      socket.off("ticket", handleTicketUpdate);
+      socket.off("appMessage", handleTicketUpdate);
+    };
+  }, [showAllTickets, userQueueIds]);
 
   useEffect(() => {
     if (user.profile.toUpperCase() === "ADMIN") {

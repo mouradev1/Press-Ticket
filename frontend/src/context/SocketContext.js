@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import openSocket from '../services/socket-io';
+import connectToSocket from '../services/socket-io';
 
 const SocketContext = createContext(null);
 
@@ -8,7 +8,7 @@ export const SocketProvider = ({ children }) => {
     const [connected, setConnected] = useState(false);
 
     useEffect(() => {
-        const newSocket = openSocket();
+        const newSocket = connectToSocket();
 
         if (newSocket) {
             newSocket.on('connect', () => {
