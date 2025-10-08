@@ -17,6 +17,7 @@ const connectToSocket = () => {
             console.error("Token inválido no localStorage");
             return null;
         }
+        
 
         // Verifica se o token está expirado
         try {
